@@ -3,9 +3,9 @@ require "language/go"
 class Coredns < Formula
   desc "DNS server that chains plugins"
   homepage "https://coredns.io"
-  url "https://github.com/coredns/coredns/archive/v1.2.0.tar.gz"
-  sha256 "ef7f8536b63dd23cff297667da750f8d4c0c9dc80087b6256dc7333c4359665e"
-  head "https://github.com/coredns/coredns.git"
+  # url "https://github.com/coredns/coredns/archive/v1.5.0.tar.gz"
+  # sha256 "69d9a7df50ecb8cc44656064537927e2abd5ff5d6b82de067e6328723b81efe3"
+  head "https://github.com/coredns/coredns.git", :tag => "v1.5.0"
 
   def default_coredns_config; <<~EOS
     . {
@@ -27,18 +27,15 @@ class Coredns < Formula
   def install
     ENV["GOPATH"] = buildpath
     ENV["GOOS"] = "darwin"
-    ENV["GOARCH"] = MacOS.prefer_64_bit? ? "amd64" : "386"
+    ENV["GOARCH"] = "amd64"
+    ENV["BUILDOPTS"] = ""
+    ENV["CHECKS"] = ""
 
     (buildpath/"src/github.com/coredns/coredns").install buildpath.children
-  #  Language::Go.stage_deps resources, buildpath/"src"
 
     cd "src/github.com/coredns/coredns" do
-      system "make", "coredns", "BINARY=#{sbin}/coredns", "CHECKS=godeps"
+      system "make", "coredns", "BINARY=#{sbin}/coredns"
     end
-#      system "go", "build", "-ldflags",
-#        "-X github.com/coredns/coredns/coremain.gitTag=#{version}",
-#        "-o", sbin/"coredns"
-#    end
 
     (buildpath/"Corefile.example").write default_coredns_config
     (etc/"coredns").mkpath
